@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Number Combination</title>
+    <style>
+        /* Add your CSS styles here */
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            margin: 0;
+            background-color: #f0f0f0;
+            position: relative;
+            background-image: url('data:image/svg+xml,%3Csvg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"%3E%3Ctext x="50%" y="50%" font-size="50" text-anchor="middle" fill="rgba(0,0,0,0.1)"%3ELok Yee Ivan Wong%3C/text%3E%3C/svg%3E');
+            background-repeat: repeat;
+        }
+        h2 {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        input[type="number"], button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 16px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .numberInput {
+            margin-bottom: 5px;
+        }
+        .highlight {
+            color: red;
+            font-weight: bold;
+        }
+        .combination {
+            margin-bottom: 5px;
+        }
+        .result {
+            float: right;
+        }
+    </style>
+    <script>
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+
+        document.onkeydown = function(e) {
+            if (e.key === 'F12' || (e.ctrlKey && (e.key === 'U' || e.key === 'u' || e.key === 'S' || e.key === 's' || e.key === 'C' || e.key === 'c' || e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j'))) {
+                e.preventDefault();
+            }
+        };
+    </script>
+</head>
+<body>
+    <h2>Enter Number of Digits</h2>
+    <input type="number" id="numDigits">
+    <button onclick="getNumbers()">Submit</button>
+    <div id="inputNumbers"></div>
+
+    <h2>Enter Group Size</h2>
+    <input type="number" id="groupSize">
+    <button onclick="getCombinationSettings()">Submit</button>
+    <div id="combinationSettings"></div>
+    <div id="combinations" class="result"></div>
+
+    <script>
+        function getNumbers() {
+            var numDigits = document.getElementById("numDigits").value;
+            var inputNumbersHTML = "";
+            for (var i = 0; i < numDigits; i++) {
+                inputNumbersHTML += "<input type='number' class='numberInput' placeholder='Enter Number'><br>";
+            }
+            document.getElementById("inputNumbers").innerHTML = inputNumbersHTML;
+        }
+
+        function getCombinationSettings() {
+            var settingsHTML = "<h2>Enter Two Numbers to Exclude from Same Combination</h2>";
+            settingsHTML += "<input type='number' id='excludeNumber1' placeholder='Enter First Number'><br>";
+            settingsHTML += "<input type='number' id='excludeNumber2' placeholder='Enter Second Number'><br>";
+            settingsHTML += "<button onclick='getCombinations()'>Generate Combinations</button>";
+            document.getElementById("combinationSettings").innerHTML = settingsHTML;
+        }
+
+        function getCombinations() {
+            var groupSize = parseInt(document.getElementById("groupSize").value);
+            var excludeNumber1 = parseInt(document.getElementById("excludeNumber1").value);
+            var excludeNumber2 = parseInt(document.getElementById("excludeNumber2").value);
+            var numbers = document.getElementsByClassName("numberInput");
+            var numArray = [];
+            for (var i = 0; i < numbers.length; i++) {
+                numArray.push(parseInt(numbers[i].value));
+            }
+            var totalSum = numArray.reduce((a, b) => a + b, 0);
+            var combinations = generateCombinations(numArray, groupSize, excludeNumber1, excludeNumber2);
+            var targetSum = Math.round(totalSum / 2);
+            var combinationsHTML = "<h2>Combinations</h2>";
+            var diffMap = {};
+
+            combinations.forEach(function(combination, index) {
+                var combinationSum = combination.reduce((a, b) => a + b, 0);
+                var difference = Math.abs(totalSum - 2 * combinationSum);
+                if (Math.abs(combinationSum - targetSum) <= 50) {
+                    if (!diffMap[difference]) {
+                        diffMap[difference] = [];
+                    }
+                    diffMap[difference].push("<div class='combination highlight'>" + combination.join(" + ") + " = " + combinationSum + " (Difference: " + difference + ")</div>");
+                }
+            });
+
+            Object.keys(diffMap).forEach(function(difference) {
+                combinationsHTML += "<h3>Difference: " + difference + "</h3>";
+                diffMap[difference].forEach(function(combination) {
+                    combinationsHTML += combination;
+                });
+            });
+
+            document.getElementById("combinations").innerHTML = combinationsHTML;
+        }
+
+        function generateCombinations(arr, size, excludeNumber1, excludeNumber2, start = 0, temp = [], result = []) {
+            if (temp.length === size) {
+                if (!(temp.includes(excludeNumber1) && temp.includes(excludeNumber2))) {
+                    result.push([...temp]);
+                }
+                return result;
+            }
+            for (var i = start; i < arr.length; i++) {
+                temp.push(arr[i]);
+                generateCombinations(arr, size, excludeNumber1, excludeNumber2, i + 1, temp, result);
+                temp.pop();
+            }
+            return result;
+        }
+    </script>
+</body>
+</html>
